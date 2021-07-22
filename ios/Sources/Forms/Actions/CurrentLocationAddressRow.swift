@@ -1,5 +1,5 @@
 //
-//  EmailContactRow.swift
+//  CurrentLocationAddressRow.swift
 //  ___PACKAGENAME___
 //
 //  Created by ___FULLUSERNAME___ on ___DATE___
