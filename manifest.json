@@ -1,0 +1,9 @@
+{
+    "name": "currentLocationAddress",
+    "type": "text",
+    "inject": true,
+    "capabilities": {
+          "location": true,
+          "service": "CurrentLocationAddressRowService"
+      }
+  }
