@@ -7,14 +7,14 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.qmobile.qmobiledatasync.utils.BaseInputControl
-import com.qmobile.qmobiledatasync.utils.InputControl
+import com.qmobile.qmobiledatasync.utils.BaseKotlinInputControl
+import com.qmobile.qmobiledatasync.utils.KotlinInputControl
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.utils.PermissionChecker
 import java.util.*
 
-@InputControl
-class CurrentLocationAddress(private val view: View) : BaseInputControl {
+@KotlinInputControl
+class CurrentLocationAddress(private val view: View) : BaseKotlinInputControl {
 
     override val autocomplete: Boolean = true
 
