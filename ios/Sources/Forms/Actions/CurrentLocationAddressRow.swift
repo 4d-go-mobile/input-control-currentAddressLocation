@@ -5,7 +5,6 @@
 //  Created by ___FULLUSERNAME___ on ___DATE___
 //  ___COPYRIGHT___
 //
-
 import UIKit
 import MapKit
 import CoreLocation
@@ -14,7 +13,7 @@ import Eureka
 import QMobileUI
 
 // name of the format
-fileprivate let kCurrentLocationAddress = "currentLocationAddress"
+private let kCurrentLocationAddress = "currentLocationAddress"
 
 // Create an Eureka row for the format
 final class CurrentLocationAddressRow: AreaRow<CurrentLocationAddressCell>, RowType {
@@ -28,7 +27,7 @@ final class CurrentLocationAddressRow: AreaRow<CurrentLocationAddressCell>, RowT
 // Create the associated row cell
 open class CurrentLocationAddressCell: TextAreaCell, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
-    
+
     required public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
@@ -51,7 +50,7 @@ open class CurrentLocationAddressCell: TextAreaCell, CLLocationManagerDelegate {
     open override func update() {
         self.textView.font = .italicSystemFont(ofSize: self.textView.font?.pointSize ?? 12)
     }
- 
+
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = manager.location ?? locations.first {
 
@@ -65,16 +64,9 @@ open class CurrentLocationAddressCell: TextAreaCell, CLLocationManagerDelegate {
                     let placeInfo = placeInfos.compactMap({$0}).joined(separator: ", ")
                     value = "\(placeInfo)\n"
                     let locValue = location.coordinate
-                    if locValue.latitude>0 {
-                        value+="+\(locValue.latitude)"
-                    } else {
-                        value+="\(locValue.latitude)"
-                    }
-                    if locValue.longitude>0 {
-                        value+="+\(locValue.longitude)"
-                    } else {
-                        value+="\(locValue.longitude)"
-                    }
+                    value+="\(locValue.latitude)".replacingOccurrences(of: ",", with: ".") // other way force local?
+                    value+=", "
+                    value+="\(locValue.longitude)".replacingOccurrences(of: ",", with: ".")
                     self?.row.value = value
                     self?.textView.text = value
                 }

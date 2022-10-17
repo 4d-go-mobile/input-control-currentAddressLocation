@@ -1,0 +1,47 @@
+name: ✅ check
+on: push
+jobs:
+  lint:
+    name: 🧹 lint
+    runs-on: macos-latest
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: ⚙️ Install swiftlint
+        run: |
+          if [ -z "$(which swiftlint)" ]; then
+            brew install swiftlint
+          else
+            swiftlint version  
+          fi
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+      - name: 🧹 iOS Code Lint
+        run: |
+          cd ios
+          if [ ! -f ".swiftlint.yml" ]; then
+            curl -L https://raw.githubusercontent.com/4d-go-mobile/check-workflow/master/form/quality/.swiftlint.yml --output .swiftlint.yml
+          fi
+          swiftlint --strict
+      - name: ⚙️ Install jsonlint
+        run: |
+          brew install jsonlint | tee
+      - name: 🧹 Manifest Lint
+        run: |
+          cat manifest.json | jsonlint
+  build:
+    name: 🏗 build
+    runs-on: macos-latest
+    env:
+      RELEASE_REPO: "https://raw.githubusercontent.com/4d-go-mobile/check-workflow/master"
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: 👷 iOS build
+        run: |
+          cd ios
+          curl -fsSL $RELEASE_REPO/form/scripts/swift_build.sh | bash -s
