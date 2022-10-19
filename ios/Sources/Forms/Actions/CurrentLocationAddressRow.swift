@@ -20,6 +20,7 @@ final class CurrentLocationAddressRow: AreaRow<CurrentLocationAddressCell>, RowT
 
     required public init(tag: String?) {
         super.init(tag: tag)
+        self.textAreaMode = TextAreaMode.readOnly
     }
 
 }
@@ -38,15 +39,29 @@ open class CurrentLocationAddressCell: TextAreaCell, CLLocationManagerDelegate {
 
     open override func setup() {
         super.setup()
-        self.isUserInteractionEnabled = false
-        locationManager.requestWhenInUseAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            self.locationManager.delegate = self
-            self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-            self.locationManager.requestLocation()
+        if let value = self.row.value, !value.isEmpty {
+            self.textView.text = value
         }
+        self.locationManager.requestWhenInUseAuthorization()
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        self.locationManager.delegate = self
+        if self.row.value?.isEmpty ?? true {
+            if CLLocationManager.locationServicesEnabled() { // XXX dispatch in queue
+                self.locationManager.requestLocation()
+            }
+        }
+        let textViewRecognizer = UITapGestureRecognizer()
+        textViewRecognizer.addTarget(self, action: #selector(touched))
+        self.textView.addGestureRecognizer(textViewRecognizer)
     }
 
+    open override func cellCanBecomeFirstResponder() -> Bool {
+        return false
+    }
+
+    @objc public func touched(textField: UITextField) {
+        self.locationManager.requestLocation()
+    }
     open override func update() {
         self.textView.font = .italicSystemFont(ofSize: self.textView.font?.pointSize ?? 12)
     }
