@@ -1,6 +1,5 @@
 package ___PACKAGE___
 
-import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Looper
@@ -14,15 +13,20 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.qmobile.qmobiledatasync.utils.BaseKotlinInputControl
 import com.qmobile.qmobiledatasync.utils.KotlinInputControl
+import com.qmobile.qmobileui.maps.MapsHelper.getAddressFromLatLng
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.utils.PermissionChecker
-import timber.log.Timber
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 @KotlinInputControl
 class CurrentLocationAddress(private val view: View) : BaseKotlinInputControl {
+
+    companion object {
+        private const val intervalSec: Long = 2
+        private const val minIntervalSec: Long = 3
+        private const val maxIntervalSec: Long = 3
+    }
 
     override val autocomplete: Boolean = true
 
@@ -37,11 +41,12 @@ class CurrentLocationAddress(private val view: View) : BaseKotlinInputControl {
 
     @Suppress("MissingPermission")
     private fun getLocation() {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(2))
-            .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(3))
-            .setMaxUpdateDelayMillis(TimeUnit.SECONDS.toMillis(3))
-            .build()
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(intervalSec))
+                .setWaitForAccurateLocation(false)
+                .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(minIntervalSec))
+                .setMaxUpdateDelayMillis(TimeUnit.SECONDS.toMillis(maxIntervalSec))
+                .build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
@@ -62,17 +67,13 @@ class CurrentLocationAddress(private val view: View) : BaseKotlinInputControl {
 
     private fun getAddress(location: Location, isLastKnownLocation: Boolean) {
         val geocoder = Geocoder(view.context, Locale.getDefault())
-        val addresses: List<Address>? = try {
-            geocoder.getFromLocation(location.latitude, location.longitude, 1)
-        } catch (e: IOException) {
-            Timber.e(e.message.orEmpty())
-            null
-        }
-        if (!addresses.isNullOrEmpty()) {
-            outputCallback(addresses.first().getAddressLine(0))
-        } else {
-            SnackbarHelper.show(view.context as FragmentActivity, "Could not get current address")
-            outputCallback("")
+        geocoder.getAddressFromLatLng(location.latitude, location.longitude) { address ->
+            if (address != null) {
+                outputCallback(address.getAddressLine(0))
+            } else {
+                SnackbarHelper.show(view.context as FragmentActivity, "Could not get current address")
+                outputCallback("")
+            }
         }
         if (!isLastKnownLocation) {
             fusedLocationClient.removeLocationUpdates(locationCallback)
